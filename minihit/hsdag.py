@@ -91,6 +91,11 @@ class HsDag(mhs.MinimalHittingSetsProblem):
         self.nodes_to_process = queue.deque()
         self.root = None
 
+        # To avoid running too long.
+        # It breaks loop before the algorithm terminates
+        # without reaching optimality.
+        self.iteration_limit = -1 # Defaults to infinity
+
     def generate_minimal_hitting_sets(self):
         for node in self.breadth_first_explore(self.root):
             if node.is_ticked:
@@ -172,6 +177,9 @@ class HsDag(mhs.MinimalHittingSetsProblem):
                     continue
             if node_in_processing.label is not None:
                 self._create_children(node_in_processing)
+
+            if self.iteration_limit == 0: break
+            self.iteration_limit -= 1
 
     def _attempt_closing_node(self, node_in_processing: HsDagNode):
         for other_node in self.breadth_first_explore(self.root):
